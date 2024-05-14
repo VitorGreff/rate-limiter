@@ -8,21 +8,20 @@ import (
 )
 
 func main() {
-	var buckets []models.Bucket
+	bucket := models.BuildBucket("vitao", 4.0)
 	e := echo.New()
 
-	// e.GET("/unlimited", func(c echo.Context) error {
-	// 	return c.String(http.StatusOK, "Unlimited! Let's Go!")
-	// })
+	e.GET("/unlimited", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Unlimited! Let's Go!")
+	})
 
 	e.GET("/limited", func(c echo.Context) error {
-		requestBucket := models.BuildBucket(c.RealIP())
-    if models.IsAddrNew(buckets, requestBucket.IpAddr){
-      requestBucket.ConsumeToken()
-      buckets = append(buckets, requestBucket)
-    }
-      return c.JSON(http.StatusOK, buckets)
-		})
+		err := bucket.TakeToken()
+		if err != nil {
+			return c.JSON(http.StatusTooManyRequests, err.Error())
+		}
+		return c.JSON(http.StatusOK, bucket)
+	})
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
