@@ -18,11 +18,10 @@ func BuildBucket(ipaddr string, refillRate float64) *Bucket {
 }
 
 func (b *Bucket) TakeToken() error {
-	now := time.Now()
 	// time passed since last refill in seconds
-	elapsedSeconds := now.Sub(b.LastRefill).Seconds()
+	elapsedSeconds := time.Now().Sub(b.LastRefill).Seconds()
 
-  // if enough time has passed to add tokens to the bucket
+	// if enough time has passed to add tokens to the bucket
 	if elapsedSeconds >= b.RefillRate {
 		// 20 -> 2
 		// 60 -> 1
@@ -32,7 +31,7 @@ func (b *Bucket) TakeToken() error {
 			b.CurrentTokenNumber = b.Capacity
 		}
 
-		b.LastRefill = now
+		b.LastRefill = time.Now()
 	}
 
 	if b.CurrentTokenNumber > 0 {
@@ -41,4 +40,13 @@ func (b *Bucket) TakeToken() error {
 	}
 
 	return errors.New("empty bucket encountered")
+}
+
+func BucketExist(buckets []Bucket, ippaddr string) (bool, int) {
+	for index, b := range buckets {
+		if b.IpAddr == ippaddr {
+			return true, index
+		}
+	}
+	return false, -1
 }
